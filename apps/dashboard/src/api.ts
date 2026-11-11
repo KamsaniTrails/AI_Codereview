@@ -79,6 +79,30 @@ export const api = {
     return res.json();
   },
 
+  async getSuggestedRepos(): Promise<Array<{ fullName: string; defaultBranch: string; private: boolean; description?: string }>> {
+    try {
+      const res = await fetch('/api/github/suggested-repos');
+      if (res.ok) return res.json();
+    } catch {}
+    return [
+      { fullName: 'KamsaniTrails/AI_Interview', defaultBranch: 'main', private: false, description: 'Interview prep with AI' },
+      { fullName: 'KamsaniTrails/AI_Codereview', defaultBranch: 'main', private: false, description: 'AI Code Reviewer Platform' }
+    ];
+  },
+
+  async connectRepo(repoFullName: string, token?: string): Promise<{ success: boolean; message: string; prCount: number; repo: Repo; reviews: Review[] }> {
+    const res = await fetch('/api/repos/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ repoFullName, token })
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `Failed to connect repository (${res.status})`);
+    }
+    return res.json();
+  },
+
   async syncInstallation(installationId: number): Promise<{ success: boolean; count: number; repos: Repo[] }> {
     const res = await fetch('/api/installations/sync', {
       method: 'POST',

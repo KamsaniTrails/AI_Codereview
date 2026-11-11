@@ -9,6 +9,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ai-reviewer/agents": "workspace:*",
     "@ai-reviewer/core": "workspace:*",
     "@ai-reviewer/db": "workspace:*",
     "@ai-reviewer/github": "workspace:*",

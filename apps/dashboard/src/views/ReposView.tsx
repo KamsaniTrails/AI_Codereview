@@ -10,7 +10,10 @@ import {
   AlertCircle,
   Loader2,
   ExternalLink,
-  Plus
+  Plus,
+  Zap,
+  ArrowRight,
+  Sparkles
 } from 'lucide-react';
 
 export const ReposView: React.FC = () => {
@@ -18,6 +21,12 @@ export const ReposView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionInProgressId, setActionInProgressId] = useState<string | null>(null);
+
+  // Quick Connect State
+  const [repoInput, setRepoInput] = useState('KamsaniTrails/AI_Interview');
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [connectSuccess, setConnectSuccess] = useState<string | null>(null);
+  const [suggestedRepos, setSuggestedRepos] = useState<Array<{ fullName: string; description?: string }>>([]);
 
   const appSlug = (import.meta as any).env?.VITE_GITHUB_APP_SLUG || 'ai-code-reviewer-app';
   const addRepoUrl = `https://github.com/apps/${appSlug}/installations/new`;
@@ -46,6 +55,7 @@ export const ReposView: React.FC = () => {
 
   useEffect(() => {
     loadRepos();
+    api.getSuggestedRepos().then(setSuggestedRepos).catch(() => {});
   }, []);
 
   // Poll every 5 seconds while any repo is in PENDING or INDEXING state
@@ -71,6 +81,25 @@ export const ReposView: React.FC = () => {
       }
     };
   }, [repos]);
+
+  const handleQuickConnect = async (customRepo?: string) => {
+    const target = (customRepo || repoInput).trim();
+    if (!target) return;
+
+    setIsConnecting(true);
+    setError(null);
+    setConnectSuccess(null);
+
+    try {
+      const res = await api.connectRepo(target);
+      setConnectSuccess(`Connected ${res.repo.fullName} and imported ${res.prCount} Pull Request(s)!`);
+      await loadRepos();
+    } catch (err: any) {
+      setError(err.message || 'Failed to connect repository');
+    } finally {
+      setIsConnecting(false);
+    }
+  };
 
   const handleReindex = async (repoId: string) => {
     setActionInProgressId(repoId);
@@ -121,12 +150,12 @@ export const ReposView: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header with Title and Add Repository Action */}
+      {/* Header with Title and Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-100">Installed Repositories</h1>
+          <h1 className="text-2xl font-bold text-slate-100">Repositories & PR Sync</h1>
           <p className="text-sm text-slate-400">
-            Repositories authorized through GitHub App with vector index status.
+            Connect any repository to automatically import and review its Pull Requests.
           </p>
         </div>
 
@@ -143,13 +172,92 @@ export const ReposView: React.FC = () => {
             href={addRepoUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium shadow-sm transition-colors"
+            className="flex items-center space-x-1.5 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-sm font-medium transition-colors"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Add repository</span>
+            <span>GitHub App Install</span>
             <ExternalLink className="w-3.5 h-3.5 opacity-70 ml-0.5" />
           </a>
         </div>
+      </div>
+
+      {/* ⚡ Instant Connect Banner (Zero Setup Required) */}
+      <div className="p-6 rounded-2xl border border-indigo-500/30 bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 shadow-lg space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2.5">
+            <div className="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg">
+              <Zap className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-slate-100 flex items-center space-x-2">
+                <span>Instant 1-Click Connect (No complex webhook setup needed)</span>
+                <span className="px-2 py-0.5 text-[10px] font-bold bg-indigo-500/20 text-indigo-300 rounded-full border border-indigo-500/30">
+                  EASY MODE
+                </span>
+              </h2>
+              <p className="text-xs text-slate-400">
+                Type any repository name or click a suggested repo below. It connects directly and brings all Pull Requests into your dashboard immediately.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-2.5">
+          <input
+            type="text"
+            value={repoInput}
+            onChange={(e) => setRepoInput(e.target.value)}
+            placeholder="owner/repository (e.g. KamsaniTrails/AI_Interview)"
+            className="flex-1 px-4 py-2.5 bg-slate-950/90 border border-slate-700 rounded-lg text-slate-100 text-sm font-mono placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+          />
+          <button
+            onClick={() => handleQuickConnect()}
+            disabled={isConnecting || !repoInput.trim()}
+            className="flex items-center justify-center space-x-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-semibold shadow-md transition-colors"
+          >
+            {isConnecting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Connecting & Fetching PRs...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                <span>Connect & Fetch PRs</span>
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* Suggested Repos Quick Pills */}
+        <div className="flex items-center space-x-2 text-xs text-slate-400 pt-1">
+          <span className="text-slate-400">Suggested:</span>
+          {suggestedRepos.map((sr) => (
+            <button
+              key={sr.fullName}
+              onClick={() => {
+                setRepoInput(sr.fullName);
+                handleQuickConnect(sr.fullName);
+              }}
+              className="px-2.5 py-1 bg-slate-800/80 hover:bg-slate-700 text-indigo-300 hover:text-indigo-200 rounded-md border border-slate-700 font-mono transition-colors"
+            >
+              {sr.fullName}
+            </button>
+          ))}
+        </div>
+
+        {connectSuccess && (
+          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs rounded-lg flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>{connectSuccess}</span>
+            </div>
+            <a href="/" className="font-semibold underline flex items-center space-x-1 hover:text-emerald-300">
+              <span>View in Reviews</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
+        )}
       </div>
 
       {/* Error state */}
@@ -183,20 +291,17 @@ export const ReposView: React.FC = () => {
           <div className="space-y-1">
             <h3 className="text-lg font-semibold text-slate-200">No repositories connected yet</h3>
             <p className="text-sm text-slate-400">
-              Install our GitHub App to authorize repositories and enable automated AI code reviews with AST vector indexing.
+              Use the 1-Click Connect above with <code>KamsaniTrails/AI_Interview</code> to import Pull Requests instantly, or install the GitHub App.
             </p>
           </div>
           <div className="pt-2">
-            <a
-              href={addRepoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => handleQuickConnect('KamsaniTrails/AI_Interview')}
               className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-md transition-colors"
             >
-              <Plus className="w-4 h-4" />
-              <span>+ Add repository</span>
-              <ExternalLink className="w-3.5 h-3.5 opacity-70" />
-            </a>
+              <Zap className="w-4 h-4" />
+              <span>Connect KamsaniTrails/AI_Interview</span>
+            </button>
           </div>
         </div>
       ) : (
@@ -228,7 +333,7 @@ export const ReposView: React.FC = () => {
                           </span>
                           <span className="flex items-center space-x-1">
                             <GitCommit className="w-3.5 h-3.5" />
-                            <span>{repo.lastIndexedSha?.slice(0, 7) || 'Unindexed'}</span>
+                            <span>{repo.lastIndexedSha?.slice(0, 7) || 'HEAD'}</span>
                           </span>
                         </div>
                       </div>
