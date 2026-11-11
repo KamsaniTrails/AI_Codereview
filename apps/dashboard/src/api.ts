@@ -26,9 +26,24 @@ export interface Repo {
   };
 }
 
+export interface DiffLine {
+  type: 'header' | 'added' | 'removed' | 'context' | string;
+  lineNum: number | null;
+  content: string;
+}
+
+export interface DiffFile {
+  filename: string;
+  status: string;
+  additions: number;
+  deletions: number;
+  lines: DiffLine[];
+}
+
 export interface Review {
   id: string;
   repoId: string;
+  repoFullName?: string;
   prNumber: number;
   headSha: string;
   status: string;
@@ -40,6 +55,7 @@ export interface Review {
   costUsd?: string | number;
   summary?: string;
   findings?: Finding[];
+  diffFiles?: DiffFile[];
 }
 
 export interface Finding {
@@ -218,6 +234,19 @@ export const api = {
         }
       ]
     };
+  },
+
+  async sendReviewChat(reviewId: string, message: string): Promise<{ response: string }> {
+    const res = await fetch(`/api/reviews/${reviewId}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Failed to send chat message (${res.status})`);
+    }
+    return res.json();
   },
 
   async sendFeedback(findingId: string, value: 1 | -1, reason?: string): Promise<void> {
