@@ -10,14 +10,17 @@ import {
   Zap,
   Loader2,
   RefreshCw,
-  Sparkles
+  Sparkles,
+  Bot,
+  MessageSquare
 } from 'lucide-react';
 
 interface ReviewsViewProps {
-  onSelectReview: (id: string) => void;
+  onSelectReview: (id: string, tab?: 'diff' | 'chat' | 'findings' | 'debug') => void;
+  onOpenAskAi?: () => void;
 }
 
-export const ReviewsView: React.FC<ReviewsViewProps> = ({ onSelectReview }) => {
+export const ReviewsView: React.FC<ReviewsViewProps> = ({ onSelectReview, onOpenAskAi }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -102,6 +105,16 @@ export const ReviewsView: React.FC<ReviewsViewProps> = ({ onSelectReview }) => {
         </div>
 
         <div className="flex items-center space-x-3">
+          {onOpenAskAi && (
+            <button
+              onClick={onOpenAskAi}
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-emerald-500/30 bg-emerald-950/30 text-emerald-300 hover:bg-emerald-900/40 text-xs font-semibold transition-colors"
+            >
+              <Bot className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+              <span>Ask AI (RAG Chat)</span>
+            </button>
+          )}
+
           <button
             onClick={load}
             className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800 text-xs text-slate-300 hover:bg-slate-700 transition-colors"
@@ -140,7 +153,7 @@ export const ReviewsView: React.FC<ReviewsViewProps> = ({ onSelectReview }) => {
               Connect your repository to instantly import and run multi-agent AI reviews on your Pull Requests with zero configuration.
             </p>
           </div>
-          <div className="pt-2">
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               onClick={() => handleQuickImport('KamsaniTrails/AI_Interview')}
               disabled={connecting}
@@ -158,6 +171,16 @@ export const ReviewsView: React.FC<ReviewsViewProps> = ({ onSelectReview }) => {
                 </>
               )}
             </button>
+
+            {onOpenAskAi && (
+              <button
+                onClick={onOpenAskAi}
+                className="inline-flex items-center space-x-2 px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/30 text-sm font-semibold transition-all"
+              >
+                <Bot className="w-4 h-4 text-emerald-400" />
+                <span>Open Ask AI Chat</span>
+              </button>
+            )}
           </div>
         </div>
       ) : (
@@ -196,12 +219,21 @@ export const ReviewsView: React.FC<ReviewsViewProps> = ({ onSelectReview }) => {
                   <td className="px-6 py-4 text-xs text-slate-400 max-w-xs truncate">
                     {rev.summary || 'AI review generated successfully.'}
                   </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-right space-x-2">
                     <button
-                      onClick={() => onSelectReview(rev.id)}
+                      onClick={() => onSelectReview(rev.id, 'chat')}
+                      className="inline-flex items-center space-x-1.5 px-2.5 py-1.5 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 rounded-lg text-xs font-semibold border border-emerald-500/30 transition-all shadow-sm"
+                      title="Chat with AI about this PR"
+                    >
+                      <Bot className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Ask AI</span>
+                    </button>
+
+                    <button
+                      onClick={() => onSelectReview(rev.id, 'diff')}
                       className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600 hover:text-white rounded-lg text-xs font-medium border border-indigo-500/30 transition-all shadow-sm"
                     >
-                      <span>Inspect Review</span>
+                      <span>Diff & Findings</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </td>

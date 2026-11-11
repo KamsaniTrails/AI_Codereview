@@ -1,7 +1,16 @@
 import React from 'react';
-import { GitPullRequest, Database, Sliders, BarChart2, CheckCircle2, ShieldAlert } from 'lucide-react';
+import {
+  GitPullRequest,
+  Database,
+  Sliders,
+  BarChart2,
+  CheckCircle2,
+  ShieldAlert,
+  Bot,
+  Sparkles
+} from 'lucide-react';
 
-export type TabType = 'reviews' | 'repos' | 'settings' | 'insights' | 'evals';
+export type TabType = 'reviews' | 'ask-ai' | 'repos' | 'settings' | 'insights' | 'evals';
 
 interface NavigationProps {
   currentTab: TabType;
@@ -11,6 +20,7 @@ interface NavigationProps {
 export const Navigation: React.FC<NavigationProps> = ({ currentTab, onTabChange }) => {
   const tabs = [
     { id: 'reviews' as TabType, label: 'Reviews', icon: GitPullRequest },
+    { id: 'ask-ai' as TabType, label: 'Ask AI (RAG Chat)', icon: Bot, isSpecial: true },
     { id: 'repos' as TabType, label: 'Repositories', icon: Database },
     { id: 'settings' as TabType, label: 'Settings', icon: Sliders },
     { id: 'insights' as TabType, label: 'Insights & Feedback', icon: BarChart2 },
@@ -32,10 +42,31 @@ export const Navigation: React.FC<NavigationProps> = ({ currentTab, onTabChange 
           </div>
         </div>
 
-        <nav className="flex space-x-1">
+        <nav className="flex items-center space-x-1.5">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = currentTab === tab.id;
+
+            if (tab.isSpecial) {
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => onTabChange(tab.id)}
+                  className={`flex items-center space-x-2 px-3.5 py-2 rounded-lg text-sm font-semibold transition-all relative ${
+                    isActive
+                      ? 'bg-gradient-to-r from-indigo-600 to-emerald-600 text-white shadow-lg shadow-indigo-500/25 border border-indigo-400/40'
+                      : 'bg-indigo-950/40 text-emerald-300 border border-emerald-500/30 hover:bg-indigo-900/40 hover:text-white'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-emerald-400 animate-pulse'}`} />
+                  <span>{tab.label}</span>
+                  <span className="px-1.5 py-0.2 rounded text-[10px] uppercase font-bold bg-emerald-500/30 text-emerald-300 ml-1">
+                    AI
+                  </span>
+                </button>
+              );
+            }
+
             return (
               <button
                 key={tab.id}
@@ -64,4 +95,3 @@ export const Navigation: React.FC<NavigationProps> = ({ currentTab, onTabChange 
     </header>
   );
 };
-

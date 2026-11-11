@@ -249,6 +249,19 @@ export const api = {
     return res.json();
   },
 
+  async sendGlobalChat(message: string, repoFullName?: string): Promise<{ response: string; repo?: string; latestReviewId?: string }> {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, repoFullName })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `Failed to send chat message (${res.status})`);
+    }
+    return res.json();
+  },
+
   async sendFeedback(findingId: string, value: 1 | -1, reason?: string): Promise<void> {
     try {
       await fetch(`/api/findings/${findingId}/feedback`, {

@@ -31,6 +31,7 @@ import {
 
 interface ReviewDetailViewProps {
   reviewId: string;
+  initialTab?: 'diff' | 'chat' | 'findings' | 'debug';
   onBack: () => void;
 }
 
@@ -41,10 +42,14 @@ interface ChatMessage {
   timestamp: string;
 }
 
-export const ReviewDetailView: React.FC<ReviewDetailViewProps> = ({ reviewId, onBack }) => {
+export const ReviewDetailView: React.FC<ReviewDetailViewProps> = ({
+  reviewId,
+  initialTab = 'diff',
+  onBack
+}) => {
   const [review, setReview] = useState<Review | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'diff' | 'chat' | 'findings' | 'debug'>('diff');
+  const [activeTab, setActiveTab] = useState<'diff' | 'chat' | 'findings' | 'debug'>(initialTab);
   const [feedbackSent, setFeedbackSent] = useState<Record<string, number>>({});
   const [copiedSnippetId, setCopiedSnippetId] = useState<string | null>(null);
 
