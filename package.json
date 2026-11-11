@@ -1,0 +1,27 @@
+{
+  "name": "ai-code-reviewer-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Enterprise-grade context-aware AI Code Review Platform with multi-agent LangGraph workflow, RAG, static analysis, and evals",
+  "scripts": {
+    "dev": "pnpm --parallel --filter api --filter worker --filter dashboard dev",
+    "dev:api": "pnpm --filter @ai-reviewer/api dev",
+    "dev:worker": "pnpm --filter @ai-reviewer/worker dev",
+    "dev:dashboard": "pnpm --filter @ai-reviewer/dashboard dev",
+    "build": "pnpm -r --filter \"./packages/*\" --filter \"./apps/*\" build",
+    "test": "pnpm -r test",
+    "test:unit": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "eval": "pnpm --filter @ai-reviewer/evals eval",
+    "eval:ablation": "pnpm --filter @ai-reviewer/evals eval --ablation",
+    "lint": "eslint . --ext .ts,.tsx",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "packageManager": "pnpm@10.5.2"
+}
+

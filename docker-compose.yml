@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 16 with pgvector extension enabled
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ai_reviewer_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_code_reviewer
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for BullMQ Job Queues (review, index, and cancel flags)
+  redis:
+    image: redis:7-alpine
+    container_name: ai_reviewer_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Express API Server (Webhooks & REST API)
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: ai_reviewer_api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ai_code_reviewer
+      - REDIS_URL=redis://redis:6379
+      - GITHUB_APP_ID=${GITHUB_APP_ID:-123456}
+      - GITHUB_WEBHOOK_SECRET=${GITHUB_WEBHOOK_SECRET:-development_webhook_secret_key_123456789}
+      - GITHUB_PRIVATE_KEY_BASE64=${GITHUB_PRIVATE_KEY_BASE64:-}
+      - LLM_PROVIDER=${LLM_PROVIDER:-mock}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # BullMQ Review & Indexing Worker (13 Pipeline Stages)
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    container_name: ai_reviewer_worker
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ai_code_reviewer
+      - REDIS_URL=redis://redis:6379
+      - GITHUB_APP_ID=${GITHUB_APP_ID:-123456}
+      - GITHUB_PRIVATE_KEY_BASE64=${GITHUB_PRIVATE_KEY_BASE64:-}
+      - LLM_PROVIDER=${LLM_PROVIDER:-mock}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # React + Vite Dashboard
+  dashboard:
+    build:
+      context: .
+      dockerfile: apps/dashboard/Dockerfile
+    container_name: ai_reviewer_dashboard
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - api
+
+  # Smee.io Webhook Forwarder Tunnel for local testing
+  smee-tunnel:
+    image: node:22-alpine
+    container_name: ai_reviewer_smee
+    restart: unless-stopped
+    command: >
+      sh -c "npm install -g smee-client && smee -u $${SMEE_URL:-https://smee.io/ai-reviewer-local} -t http://api:3000/webhooks/github"
+    environment:
+      - SMEE_URL=${SMEE_URL:-https://smee.io/ai-reviewer-local}
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  redisdata:
+

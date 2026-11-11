@@ -1,0 +1,26 @@
+{
+  "name": "@ai-reviewer/evals",
+  "version": "1.0.0",
+  "description": "Evaluation benchmark suite with 30+ benchmark PRs, metrics runner, and ablation table generator",
+  "main": "./src/index.ts",
+  "scripts": {
+    "eval": "tsx src/runner.ts",
+    "eval:ablation": "tsx src/runner.ts --ablation",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ai-reviewer/agents": "workspace:*",
+    "@ai-reviewer/analyzers": "workspace:*",
+    "@ai-reviewer/core": "workspace:*",
+    "@ai-reviewer/db": "workspace:*",
+    "@ai-reviewer/indexer": "workspace:*",
+    "@ai-reviewer/llm": "workspace:*",
+    "@ai-reviewer/retrieval": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "vitest": "^2.1.8"
+  }
+}
+

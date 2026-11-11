@@ -1,0 +1,28 @@
+{
+  "id": "case-12-unhandled-promise-rejection",
+  "title": "Async promise left floating without catch or await",
+  "type": "real_bug",
+  "language": "typescript",
+  "repo": "acme/notification-service",
+  "baseCommit": "base-12",
+  "headCommit": "head-12",
+  "diff": "diff --git a/src/notify.ts b/src/notify.ts\n--- a/src/notify.ts\n+++ b/src/notify.ts\n@@ -5,4 +5,6 @@ export function sendNotification(email: string) {\n+  fetch(\"https://mailer/send\", { method: \"POST\" });\n+  return { status: \"queued\" };\n }",
+  "files": [
+    {
+      "path": "src/notify.ts",
+      "content": "export function sendNotification(email: string) {\n  fetch(\"https://mailer/send\", { method: \"POST\" });\n  return { status: \"queued\" };\n}"
+    }
+  ],
+  "expectedFindings": [
+    {
+      "file": "src/notify.ts",
+      "lineRange": [
+        1,
+        4
+      ],
+      "category": "bug",
+      "severity": "high",
+      "description": "Unhandled floating promise will cause unhandled rejections"
+    }
+  ]
+}

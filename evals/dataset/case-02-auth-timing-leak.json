@@ -1,0 +1,28 @@
+{
+  "id": "case-02-auth-timing-leak",
+  "title": "Timing attack in password verification",
+  "type": "real_bug",
+  "language": "typescript",
+  "repo": "acme/auth-service",
+  "baseCommit": "base-02",
+  "headCommit": "head-02",
+  "diff": "diff --git a/src/auth/login.ts b/src/auth/login.ts\n--- a/src/auth/login.ts\n+++ b/src/auth/login.ts\n@@ -40,4 +40,5 @@ export function verifyToken(password: string, entered: string) {\n+  if (password === entered) {\n+    return true;\n+  }\n+  return false;\n }",
+  "files": [
+    {
+      "path": "src/auth/login.ts",
+      "content": "export function verifyToken(password: string, entered: string) {\n  if (password === entered) {\n    return true;\n  }\n  return false;\n}"
+    }
+  ],
+  "expectedFindings": [
+    {
+      "file": "src/auth/login.ts",
+      "lineRange": [
+        1,
+        5
+      ],
+      "category": "security",
+      "severity": "high",
+      "description": "Plain equality check on secret tokens leaks timing information"
+    }
+  ]
+}

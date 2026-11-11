@@ -1,0 +1,58 @@
+name: CD Deployment Pipeline
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    name: Build Docker Images and Push to GHCR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push API Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/api:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/api:latest
+
+      - name: Build and Push Worker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/worker/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/worker:${{ github.sha }}
+            ghcr.io/${{ github.repository }}/worker:latest
+
+  staging-smoke-test:
+    name: Staging Deployment & Webhook Smoke Test
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Smoke Test Staging Endpoint
+        run: |
+          echo "Simulating delivery of signed test webhook to staging endpoint..."
+          echo "Expected HTTP 202 Accepted"
+

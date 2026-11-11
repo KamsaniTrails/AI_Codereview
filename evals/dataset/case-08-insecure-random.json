@@ -1,0 +1,28 @@
+{
+  "id": "case-08-insecure-random",
+  "title": "Using Math.random() to generate session token",
+  "type": "real_bug",
+  "language": "typescript",
+  "repo": "acme/session-manager",
+  "baseCommit": "base-08",
+  "headCommit": "head-08",
+  "diff": "diff --git a/src/token.ts b/src/token.ts\n--- a/src/token.ts\n+++ b/src/token.ts\n@@ -1,3 +1,5 @@\n+export function generateSessionToken() {\n+  return \"token_\" + Math.random();\n+}\n",
+  "files": [
+    {
+      "path": "src/token.ts",
+      "content": "export function generateSessionToken() {\n  return \"token_\" + Math.random();\n}"
+    }
+  ],
+  "expectedFindings": [
+    {
+      "file": "src/token.ts",
+      "lineRange": [
+        1,
+        3
+      ],
+      "category": "security",
+      "severity": "medium",
+      "description": "Math.random() is cryptographically predictable"
+    }
+  ]
+}

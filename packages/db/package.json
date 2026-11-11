@@ -1,0 +1,22 @@
+{
+  "name": "@ai-reviewer/db",
+  "version": "1.0.0",
+  "description": "Database layer with PostgreSQL, pgvector, and Drizzle ORM for AI Code Reviewer",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ai-reviewer/core": "workspace:*",
+    "drizzle-orm": "^0.38.4",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "drizzle-kit": "^0.30.2",
+    "vitest": "^2.1.8"
+  }
+}
+

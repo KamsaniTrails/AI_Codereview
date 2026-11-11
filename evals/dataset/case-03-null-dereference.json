@@ -1,0 +1,28 @@
+{
+  "id": "case-03-null-dereference",
+  "title": "Null pointer dereference on user profile",
+  "type": "real_bug",
+  "language": "typescript",
+  "repo": "acme/profile-api",
+  "baseCommit": "base-03",
+  "headCommit": "head-03",
+  "diff": "diff --git a/src/routes/profile.ts b/src/routes/profile.ts\n--- a/src/routes/profile.ts\n+++ b/src/routes/profile.ts\n@@ -28,4 +28,4 @@ export function getUserEmail(user: any) {\n+  return user.profile.email;\n }",
+  "files": [
+    {
+      "path": "src/routes/profile.ts",
+      "content": "export function getUserEmail(user: any) {\n  return user.profile.email;\n}"
+    }
+  ],
+  "expectedFindings": [
+    {
+      "file": "src/routes/profile.ts",
+      "lineRange": [
+        1,
+        3
+      ],
+      "category": "bug",
+      "severity": "high",
+      "description": "Unchecked nested property access causes runtime TypeError"
+    }
+  ]
+}

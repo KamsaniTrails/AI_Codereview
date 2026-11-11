@@ -1,0 +1,28 @@
+{
+  "id": "case-17-injected-issue",
+  "title": "Injected bug #5: authentication and boundary condition check",
+  "type": "injected_bug",
+  "language": "typescript",
+  "repo": "acme/microservice",
+  "baseCommit": "base-17",
+  "headCommit": "head-17",
+  "diff": "diff --git a/src/auth/login.ts b/src/auth/login.ts\n--- a/src/auth/login.ts\n+++ b/src/auth/login.ts\n@@ -42,3 +42,3 @@\n+ password === input\n",
+  "files": [
+    {
+      "path": "src/auth/login.ts",
+      "content": "export function verify(password: string, input: string) {\n  return password === input;\n}"
+    }
+  ],
+  "expectedFindings": [
+    {
+      "file": "src/auth/login.ts",
+      "lineRange": [
+        1,
+        4
+      ],
+      "category": "security",
+      "severity": "high",
+      "description": "Injected security boundary vulnerability"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "id": "case-20-injected-issue",
+  "title": "Injected bug #8: authentication and boundary condition check",
+  "type": "injected_bug",
+  "language": "python",
+  "repo": "acme/microservice",
+  "baseCommit": "base-20",
+  "headCommit": "head-20",
+  "diff": "diff --git a/src/db/users.ts b/src/db/users.ts\n--- a/src/db/users.ts\n+++ b/src/db/users.ts\n@@ -18,3 +18,3 @@\n+ const query = \"SELECT * FROM users WHERE id = \" + id;\n",
+  "files": [
+    {
+      "path": "src/db/users.ts",
+      "content": "export function findUser(id: string) {\n  const query = \"SELECT * FROM users WHERE id = \" + id;\n  return db.query(query);\n}"
+    }
+  ],
+  "expectedFindings": [
+    {
+      "file": "src/db/users.ts",
+      "lineRange": [
+        1,
+        4
+      ],
+      "category": "security",
+      "severity": "high",
+      "description": "Injected security boundary vulnerability"
+    }
+  ]
+}

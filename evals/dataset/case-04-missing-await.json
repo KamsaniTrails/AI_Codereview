@@ -1,0 +1,28 @@
+{
+  "id": "case-04-missing-await",
+  "title": "Missing await on asynchronous fetch",
+  "type": "real_bug",
+  "language": "typescript",
+  "repo": "acme/billing",
+  "baseCommit": "base-04",
+  "headCommit": "head-04",
+  "diff": "diff --git a/src/services/api.ts b/src/services/api.ts\n--- a/src/services/api.ts\n+++ b/src/services/api.ts\n@@ -20,4 +20,6 @@ export async function chargeCard(userId: string) {\n+  const res = fetch(\"https://payment.gateway/charge\", { method: \"POST\" });\n+  return res;\n }",
+  "files": [
+    {
+      "path": "src/services/api.ts",
+      "content": "export async function chargeCard(userId: string) {\n  const res = fetch(\"https://payment.gateway/charge\", { method: \"POST\" });\n  return res;\n}"
+    }
+  ],
+  "expectedFindings": [
+    {
+      "file": "src/services/api.ts",
+      "lineRange": [
+        1,
+        4
+      ],
+      "category": "bug",
+      "severity": "high",
+      "description": "Asynchronous fetch called without await in async function"
+    }
+  ]
+}

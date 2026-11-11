@@ -1,0 +1,28 @@
+{
+  "id": "case-06-off-by-one",
+  "title": "Off-by-one loop boundary on array",
+  "type": "real_bug",
+  "language": "typescript",
+  "repo": "acme/analytics",
+  "baseCommit": "base-06",
+  "headCommit": "head-06",
+  "diff": "diff --git a/src/utils/array.ts b/src/utils/array.ts\n--- a/src/utils/array.ts\n+++ b/src/utils/array.ts\n@@ -10,4 +10,6 @@ export function printItems(items: string[]) {\n+  for (let i = 0; i <= items.length; i++) {\n+    console.log(items[i]);\n+  }\n }",
+  "files": [
+    {
+      "path": "src/utils/array.ts",
+      "content": "export function printItems(items: string[]) {\n  for (let i = 0; i <= items.length; i++) {\n    console.log(items[i]);\n  }\n}"
+    }
+  ],
+  "expectedFindings": [
+    {
+      "file": "src/utils/array.ts",
+      "lineRange": [
+        1,
+        5
+      ],
+      "category": "bug",
+      "severity": "medium",
+      "description": "Using <= on array length reads past end of array"
+    }
+  ]
+}

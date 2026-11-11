@@ -1,0 +1,28 @@
+{
+  "id": "case-11-missing-unit-test",
+  "title": "New critical calculation added without test coverage",
+  "type": "real_bug",
+  "language": "typescript",
+  "repo": "acme/tax-calculator",
+  "baseCommit": "base-11",
+  "headCommit": "head-11",
+  "diff": "diff --git a/src/math/calc.ts b/src/math/calc.ts\n--- a/src/math/calc.ts\n+++ b/src/math/calc.ts\n@@ -1,3 +1,6 @@\n+export function calculateCompoundTax(principal: number, rate: number, years: number) {\n+  return principal * Math.pow(1 + rate, years) - principal;\n+}\n",
+  "files": [
+    {
+      "path": "src/math/calc.ts",
+      "content": "export function calculateCompoundTax(principal: number, rate: number, years: number) {\n  return principal * Math.pow(1 + rate, years) - principal;\n}\n"
+    }
+  ],
+  "expectedFindings": [
+    {
+      "file": "src/math/calc.ts",
+      "lineRange": [
+        1,
+        4
+      ],
+      "category": "test",
+      "severity": "medium",
+      "description": "Critical business calculation lacks test coverage"
+    }
+  ]
+}

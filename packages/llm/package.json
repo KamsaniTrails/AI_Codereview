@@ -1,0 +1,19 @@
+{
+  "name": "@ai-reviewer/llm",
+  "version": "1.0.0",
+  "description": "Unified LLM and Embeddings client interface with OpenAI, Gemini, Anthropic, and Mock adapters",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ai-reviewer/core": "workspace:*",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "vitest": "^2.1.8"
+  }
+}
+

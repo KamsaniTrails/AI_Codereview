@@ -1,0 +1,58 @@
+name: Evaluation Benchmark Pipeline
+
+on:
+  pull_request:
+    paths:
+      - 'packages/agents/**'
+      - 'packages/retrieval/**'
+      - 'packages/llm/**'
+      - 'evals/**'
+  schedule:
+    - cron: '0 2 * * *' # Nightly benchmark run
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    name: Run Benchmark Evals & Generate Ablation Table
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.5.2
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run Evals & Ablation Study
+        run: pnpm eval:ablation
+        env:
+          NODE_ENV: test
+          LLM_PROVIDER: mock
+
+      - name: Post Metrics as PR Comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'evals/reports/benchmark_ablation_report.md';
+            if (fs.existsSync(reportPath)) {
+              const body = fs.readFileSync(reportPath, 'utf-8');
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body
+              });
+            }
+

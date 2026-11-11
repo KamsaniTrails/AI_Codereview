@@ -1,0 +1,28 @@
+{
+  "id": "case-07-arbitrary-eval",
+  "title": "Direct call to eval() with external input",
+  "type": "real_bug",
+  "language": "javascript",
+  "repo": "acme/script-runner",
+  "baseCommit": "base-07",
+  "headCommit": "head-07",
+  "diff": "diff --git a/src/runner.js b/src/runner.js\n--- a/src/runner.js\n+++ b/src/runner.js\n@@ -1,3 +1,5 @@\n+function executeDynamicFormula(formula) {\n+  return eval(formula);\n+}\n",
+  "files": [
+    {
+      "path": "src/runner.js",
+      "content": "function executeDynamicFormula(formula) {\n  return eval(formula);\n}"
+    }
+  ],
+  "expectedFindings": [
+    {
+      "file": "src/runner.js",
+      "lineRange": [
+        1,
+        3
+      ],
+      "category": "security",
+      "severity": "critical",
+      "description": "eval() enables arbitrary remote code execution"
+    }
+  ]
+}

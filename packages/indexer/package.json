@@ -1,0 +1,20 @@
+{
+  "name": "@ai-reviewer/indexer",
+  "version": "1.0.0",
+  "description": "Codebase indexer, AST symbol extraction, sliding window chunker, embedding generator, and call graph builder",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@ai-reviewer/core": "workspace:*",
+    "@ai-reviewer/db": "workspace:*",
+    "@ai-reviewer/llm": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "vitest": "^2.1.8"
+  }
+}
+

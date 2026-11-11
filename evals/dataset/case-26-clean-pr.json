@@ -1,0 +1,17 @@
+{
+  "id": "case-26-clean-pr",
+  "title": "Clean PR #4: refactor helper functions and add documentation",
+  "type": "clean_pr",
+  "language": "typescript",
+  "repo": "acme/clean-utils",
+  "baseCommit": "base-26",
+  "headCommit": "head-26",
+  "diff": "diff --git a/src/helpers/string.ts b/src/helpers/string.ts\n--- a/src/helpers/string.ts\n+++ b/src/helpers/string.ts\n@@ -1,4 +1,7 @@\n+/**\n+ * Safely capitalizes the first letter of a non-empty string.\n+ */\n export function capitalize(str: string): string {\n-  return str.toUpperCase();\n+  if (!str) return '';\n+  return str.charAt(0).toUpperCase() + str.slice(1);\n }",
+  "files": [
+    {
+      "path": "src/helpers/string.ts",
+      "content": "/**\n * Safely capitalizes the first letter of a non-empty string.\n */\nexport function capitalize(str: string): string {\n  if (!str) return '';\n  return str.charAt(0).toUpperCase() + str.slice(1);\n}"
+    }
+  ],
+  "expectedFindings": []
+}
