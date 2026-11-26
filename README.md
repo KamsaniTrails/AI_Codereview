@@ -1,11 +1,37 @@
 # AI Code Review Platform
 
-[![CI Pipeline](https://github.com/ai-reviewer/ai-code-reviewer/actions/workflows/ci.yml/badge.svg)](https://github.com/ai-reviewer/ai-code-reviewer/actions/workflows/ci.yml)
-[![Evals Benchmark](https://github.com/ai-reviewer/ai-code-reviewer/actions/workflows/eval.yml/badge.svg)](https://github.com/ai-reviewer/ai-code-reviewer/actions/workflows/eval.yml)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <img src="apps/dashboard/public/logo.png" width="130" height="130" alt="AI Code Reviewer Logo" style="border-radius: 26px; box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);" />
+</p>
 
-> An enterprise-grade GitHub App that reviews pull requests automatically with full codebase context (RAG), static analysis pre-checks, specialist multi-agent reasoning, and benchmarked quality evals.
+<p align="center">
+  <a href="https://github.com/apps/ai-code-reviewer-kamsani/installations/new">
+    <img src="https://img.shields.io/badge/GitHub%20App-Install%20App-2ea44f?style=for-the-badge&logo=github&logoColor=white" alt="Install GitHub App" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://ai-codereview-git-main-mohanasrees-projects.vercel.app/">
+    <img src="https://img.shields.io/badge/Live%20Dashboard-Visit%20Platform-6366f1?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Dashboard" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://ai-codereview-git-main-mohanasrees-projects.vercel.app/"><img src="https://img.shields.io/badge/Vercel-Live%20Demo-brightgreen.svg" alt="Vercel Live Demo" /></a>
+  <a href="https://github.com/apps/ai-code-reviewer-kamsani"><img src="https://img.shields.io/badge/GitHub%20App-Public-blue.svg" alt="GitHub App Public" /></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-strict-blue.svg" alt="TypeScript" /></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" /></a>
+</p>
+
+> **An enterprise-grade GitHub App that reviews pull requests automatically with full codebase context (RAG), static analysis pre-checks, specialist multi-agent reasoning, and benchmarked quality evals.**
+
+---
+
+### 🌐 Quick Links & 1-Click Access
+
+| Resource | Link | Description |
+|---|---|---|
+| 📦 **Install GitHub App** | [**Install on GitHub**](https://github.com/apps/ai-code-reviewer-kamsani/installations/new) | 1-Click install `ai-code-reviewer-kamsani` to review your PRs |
+| 🚀 **Live Web Platform** | [**Open Live Dashboard**](https://ai-codereview-git-main-mohanasrees-projects.vercel.app/) | Explore Pull Requests, Security Findings, RAG Chat & AI Evals |
+| 🐙 **GitHub Repository** | [**KamsaniTrails/AI_Codereview**](https://github.com/KamsaniTrails/AI_Codereview) | Source code, LangGraph agents, analyzers & architecture |
 
 ---
 
