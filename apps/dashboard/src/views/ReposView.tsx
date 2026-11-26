@@ -21,6 +21,7 @@ export const ReposView: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionInProgressId, setActionInProgressId] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   // Quick Connect State
   const [repoInput, setRepoInput] = useState('KamsaniTrails/AI_Interview');
@@ -31,7 +32,7 @@ export const ReposView: React.FC = () => {
   const appSlug = (import.meta as any).env?.VITE_GITHUB_APP_SLUG || 'ai-code-reviewer-app';
   const addRepoUrl = `https://github.com/apps/${appSlug}/installations/new`;
 
-  const pollTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const loadRepos = async (isBackgroundPoll = false) => {
     if (!isBackgroundPoll) {
@@ -101,6 +102,20 @@ export const ReposView: React.FC = () => {
     }
   };
 
+  const handleSyncAll = async () => {
+    setIsSyncing(true);
+    setError(null);
+    try {
+      const res = await api.syncInstallation();
+      setConnectSuccess(`Synced ${res.count} repositories across all installations from GitHub!`);
+      await loadRepos();
+    } catch (err: any) {
+      setError(err.message || 'Failed to sync installations');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handleReindex = async (repoId: string) => {
     setActionInProgressId(repoId);
     try {
@@ -160,6 +175,20 @@ export const ReposView: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-3">
+          <button
+            onClick={() => handleSyncAll()}
+            disabled={isSyncing}
+            className="flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-sm font-medium text-white shadow-sm transition-colors"
+            title="Automatically discover all installations and sync repositories from GitHub"
+          >
+            {isSyncing ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+            <span>{isSyncing ? 'Syncing...' : 'Sync GitHub App'}</span>
+          </button>
+
           <button
             onClick={() => loadRepos()}
             className="flex items-center space-x-1.5 px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-sm text-slate-300 hover:bg-slate-700 transition-colors"

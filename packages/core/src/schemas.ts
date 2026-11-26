@@ -133,7 +133,7 @@ export const PushWebhookSchema = z.object({
 });
 
 export const SyncInstallationSchema = z.object({
-  installationId: z.coerce.number().int().positive({ message: 'installationId must be a positive integer' })
+  installationId: z.coerce.number().int().positive({ message: 'installationId must be a positive integer' }).optional()
 });
 
 export const InstallationWebhookSchema = z.object({
@@ -165,7 +165,8 @@ export const InstallationRepositoriesWebhookSchema = z.object({
   repositories_added: z.array(z.object({
     id: z.number().int(),
     name: z.string(),
-    full_name: z.string()
+    full_name: z.string(),
+    default_branch: z.string().optional()
   })).optional().default([]),
   repositories_removed: z.array(z.object({
     id: z.number().int(),

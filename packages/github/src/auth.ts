@@ -46,7 +46,7 @@ export class GitHubAuthService {
     const now = Math.floor(Date.now() / 1000);
     const payload = {
       iat: now - 60,
-      exp: now + (10 * 60),
+      exp: now + (9 * 60), // 9 minutes to avoid clock drift rejection
       iss: this.appId
     };
 
@@ -65,7 +65,7 @@ export class GitHubAuthService {
     const now = Date.now();
     const fiveMinutes = 5 * 60 * 1000;
 
-    if (cached && (cached.expiresAt - now) > fiveMinutes) {
+    if (cached && (cached.expiresAt - now) > fiveMinutes && (!this.privateKey || !cached.token.startsWith('mock-'))) {
       return cached.token;
     }
 

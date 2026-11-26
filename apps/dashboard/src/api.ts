@@ -119,11 +119,11 @@ export const api = {
     return res.json();
   },
 
-  async syncInstallation(installationId: number): Promise<{ success: boolean; count: number; repos: Repo[] }> {
+  async syncInstallation(installationId?: number): Promise<{ success: boolean; count: number; repos: Repo[] }> {
     const res = await fetch('/api/installations/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ installationId })
+      body: JSON.stringify(installationId ? { installationId } : {})
     });
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));

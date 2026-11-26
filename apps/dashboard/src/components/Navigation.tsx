@@ -6,8 +6,7 @@ import {
   BarChart2,
   CheckCircle2,
   ShieldAlert,
-  Bot,
-  Sparkles
+  Bot
 } from 'lucide-react';
 
 export type TabType = 'reviews' | 'ask-ai' | 'repos' | 'settings' | 'insights' | 'evals';

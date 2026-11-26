@@ -7,11 +7,11 @@ import {
   SyncInstallationSchema,
   logger
 } from '@ai-reviewer/core';
-import { getInstallationOctokit } from '@ai-reviewer/github';
+import { getInstallationOctokit, getAppOctokit } from '@ai-reviewer/github';
 import { reviewGraphRunner } from '@ai-reviewer/agents';
 import { enqueueIndexJob } from '../queue.js';
 
-export const restApiRouter = Router();
+export const restApiRouter: Router = Router();
 
 // --- Instant 1-Click Connect & Suggested Repositories ---
 restApiRouter.get('/github/suggested-repos', async (req: Request, res: Response) => {
@@ -138,12 +138,15 @@ restApiRouter.post('/repos/connect', async (req: Request, res: Response) => {
             validDiffLines: new Set<number>()
           }));
 
-          const agentResult = await reviewGraphRunner.runReview({
+          const agentResult = await reviewGraphRunner.run({
             repoId: dbRepo.id,
             prTitle: pr.title || `PR #${prNumber}`,
             prBody: pr.body || '',
-            files: changedFiles,
-            contextPack: { files: [], chunks: [], callers: [], callees: [], promptTotalTokens: 500 }
+            headSha,
+            changedFiles,
+            contextPacks: new Map(),
+            staticFindings: [],
+            settings: dbRepo.settings
           });
 
           let findingsToSave = agentResult?.findings || [];
@@ -243,64 +246,89 @@ restApiRouter.post('/installations/sync', async (req: Request, res: Response) =>
   const { installationId } = parsed.data;
 
   try {
-    // 1. Ensure installation record exists in database
-    await dbService.upsertInstallation({
-      id: installationId,
-      accountLogin: `installation-${installationId}`,
-      accountType: 'Organization'
-    });
+    let targetInstallations: Array<{ id: number; accountLogin: string; accountType: string }> = [];
 
-    // 2. Fetch accessible repositories from GitHub via Octokit with pagination
-    let reposFromGitHub: Array<{ id: number; name: string; full_name: string; default_branch?: string }> = [];
+    if (installationId) {
+      targetInstallations = [{
+        id: installationId,
+        accountLogin: `installation-${installationId}`,
+        accountType: 'User'
+      }];
+    } else {
+      const appOctokit = getAppOctokit();
+      const { data: installs } = await appOctokit.request('GET /app/installations');
+      targetInstallations = installs.map((i: any) => ({
+        id: i.id,
+        accountLogin: i.account?.login || `installation-${i.id}`,
+        accountType: i.target_type || 'User'
+      }));
+    }
 
-    try {
-      const octokit = await getInstallationOctokit(installationId);
-      let page = 1;
-      const perPage = 100;
-
-      while (true) {
-        const { data } = await octokit.rest.apps.listReposAccessibleToInstallation({
-          per_page: perPage,
-          page
-        });
-
-        reposFromGitHub.push(...data.repositories);
-        if (data.repositories.length < perPage || (data.total_count && reposFromGitHub.length >= data.total_count)) {
-          break;
-        }
-        page++;
-      }
-    } catch (octokitErr: any) {
-      logger.warn({ err: octokitErr.message, installationId }, 'GitHub API call failed or offline mode');
-      // If testing in offline/mock environment with injected test repos:
-      if (req.body.mockRepositories && Array.isArray(req.body.mockRepositories)) {
-        reposFromGitHub = req.body.mockRepositories;
-      } else {
-        throw octokitErr;
-      }
+    if (targetInstallations.length === 0) {
+      res.json({ success: true, count: 0, repos: [], message: 'No active installations found' });
+      return;
     }
 
     const savedRepos = [];
-    for (const r of reposFromGitHub) {
-      const dbRepo = await dbService.upsertRepo({
-        installationId,
-        githubRepoId: r.id,
-        fullName: r.full_name,
-        defaultBranch: r.default_branch || 'main',
-        indexStatus: 'PENDING'
+
+    for (const inst of targetInstallations) {
+      // 1. Ensure installation record exists in database
+      await dbService.upsertInstallation({
+        id: inst.id,
+        accountLogin: inst.accountLogin,
+        accountType: inst.accountType
       });
 
-      // Enqueue one index job per repo
-      await enqueueIndexJob({
-        installationId,
-        repoId: dbRepo.id,
-        repoFullName: dbRepo.fullName,
-        commitSha: 'HEAD',
-        defaultBranch: dbRepo.defaultBranch,
-        isIncremental: false
-      });
+      // 2. Fetch accessible repositories from GitHub via Octokit with pagination
+      let reposFromGitHub: Array<{ id: number; name: string; full_name: string; default_branch?: string }> = [];
 
-      savedRepos.push(dbRepo);
+      try {
+        const octokit = await getInstallationOctokit(inst.id);
+        let page = 1;
+        const perPage = 100;
+
+        while (true) {
+          const { data } = await octokit.request('GET /installation/repositories', {
+            per_page: perPage,
+            page
+          });
+
+          reposFromGitHub.push(...data.repositories);
+          if (data.repositories.length < perPage || (data.total_count && reposFromGitHub.length >= data.total_count)) {
+            break;
+          }
+          page++;
+        }
+      } catch (octokitErr: any) {
+        logger.warn({ err: octokitErr.message, installationId: inst.id }, 'GitHub API call failed or offline mode');
+        if (req.body.mockRepositories && Array.isArray(req.body.mockRepositories)) {
+          reposFromGitHub = req.body.mockRepositories;
+        } else {
+          throw octokitErr;
+        }
+      }
+
+      for (const r of reposFromGitHub) {
+        const dbRepo = await dbService.upsertRepo({
+          installationId: inst.id,
+          githubRepoId: r.id,
+          fullName: r.full_name,
+          defaultBranch: r.default_branch || 'main',
+          indexStatus: 'PENDING'
+        });
+
+        // Enqueue one index job per repo
+        await enqueueIndexJob({
+          installationId: inst.id,
+          repoId: dbRepo.id,
+          repoFullName: dbRepo.fullName,
+          commitSha: 'HEAD',
+          defaultBranch: dbRepo.defaultBranch,
+          isIncremental: false
+        });
+
+        savedRepos.push(dbRepo);
+      }
     }
 
     res.json({

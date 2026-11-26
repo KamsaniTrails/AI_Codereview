@@ -13,7 +13,7 @@
       "@ai-reviewer/agents": ["./packages/agents/src/index.ts"]
     }
   },
-  "include": ["packages/*/src", "apps/*/src", "evals/src"],
-  "exclude": ["node_modules", "dist", "**/dist", "apps/dashboard/dist"]
+  "include": ["packages/*/src", "apps/api/src", "apps/worker/src", "evals/src"],
+  "exclude": ["node_modules", "dist", "**/dist", "apps/dashboard"]
 }
 

@@ -1,0 +1,10 @@
+{
+  "buildCommand": "pnpm --filter @ai-reviewer/dashboard build",
+  "outputDirectory": "apps/dashboard/dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

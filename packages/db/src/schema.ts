@@ -147,7 +147,7 @@ export const feedback = pgTable('feedback', {
   reason: text('reason'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
 });
-
+//code chunks
 export const codeChunks = pgTable(
   'code_chunks',
   {
@@ -188,7 +188,7 @@ export const fileIndex = pgTable(
     primaryKey({ columns: [table.repoId, table.filePath] })
   ]
 );
-
+//symbol_edges
 export const symbolEdges = pgTable(
   'symbol_edges',
   {

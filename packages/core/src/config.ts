@@ -1,7 +1,29 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
+import path from 'node:path';
+import fs from 'node:fs';
 
-dotenv.config();
+// Resolve .env by searching current and parent directories
+const findEnvPath = (): string | undefined => {
+  let curr = process.cwd();
+  for (let i = 0; i < 5; i++) {
+    const candidate = path.join(curr, '.env');
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+    const parent = path.dirname(curr);
+    if (parent === curr) break;
+    curr = parent;
+  }
+  return undefined;
+};
+
+const resolvedEnvPath = findEnvPath();
+if (resolvedEnvPath) {
+  dotenv.config({ path: resolvedEnvPath });
+} else {
+  dotenv.config();
+}
 
 export const ConfigSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),

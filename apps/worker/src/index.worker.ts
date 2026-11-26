@@ -14,7 +14,7 @@ export function startIndexWorker(redisUrl?: string): Worker<IndexJobPayload> {
   const url = redisUrl || config.REDIS_URL;
   const connection = new Redis(url, { maxRetriesPerRequest: null, lazyConnect: true });
   const indexer = new RepositoryIndexer();
-  l
+
   const worker = new Worker<IndexJobPayload>(
     'index',
     async (job: Job<IndexJobPayload>) => {

@@ -257,7 +257,7 @@ Return ONLY the verified findings array that are fully supported by the diff. Di
         temperature: 0,
         signal
       });
-      return res.data;
+      return res.data.map(f => ({ ...f, agent: f.category || 'verifier' }));
     } catch {
       // If verifier call fails, fall back to keeping original candidates
       return candidates;

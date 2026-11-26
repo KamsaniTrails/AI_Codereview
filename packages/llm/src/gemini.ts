@@ -8,7 +8,7 @@ export class GeminiAdapter implements ILlmClient {
   private model: string;
   private circuitBreaker = new CircuitBreaker();
 
-  constructor(apiKey: string, model = 'gemini-1.5-pro') {
+  constructor(apiKey: string, model = 'gemini-2.5-pro') {
     this.apiKey = apiKey;
     this.model = model;
   }

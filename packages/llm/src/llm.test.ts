@@ -46,5 +46,26 @@ describe('packages/llm', () => {
     expect(cb.getState()).toBe('OPEN');
     expect(cb.canExecute()).toBe(false);
   });
+
+  it('FallbackLlmAdapter falls back to mock simulation when primary provider fails', async () => {
+    const { FallbackLlmAdapter } = await import('./factory.js');
+    const failingPrimary: any = {
+      providerName: 'failing-provider',
+      chatCompletion: async () => {
+        throw new Error('API Quota Exceeded / Rate Limit');
+      },
+      generateStructuredOutput: async () => {
+        throw new Error('API Quota Exceeded / Rate Limit');
+      }
+    };
+
+    const client = new FallbackLlmAdapter(failingPrimary, 'test-model');
+    const res = await client.chatCompletion({
+      messages: [{ role: 'user', content: 'hello' }]
+    });
+
+    expect(res).toBeDefined();
+    expect(res.content).toContain('Analysis completed');
+  });
 });
 

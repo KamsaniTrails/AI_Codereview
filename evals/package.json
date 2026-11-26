@@ -1,6 +1,7 @@
 {
   "name": "@ai-reviewer/evals",
   "version": "1.0.0",
+  "type": "module",
   "description": "Evaluation benchmark suite with 30+ benchmark PRs, metrics runner, and ablation table generator",
   "main": "./src/index.ts",
   "scripts": {

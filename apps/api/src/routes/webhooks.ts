@@ -14,7 +14,7 @@ import {
   flagReviewAsCancelled
 } from '../queue.js';
 
-export const webhookRouter = Router();
+export const webhookRouter: Router = Router();
 
 webhookRouter.post('/github', async (req: Request, res: Response): Promise<void> => {
   const event = req.headers['x-github-event'] as string;

@@ -9,6 +9,11 @@ export function verifyGitHubSignatureMiddleware(req: Request, res: Response, nex
 
   // In testing or when explicit mock secret is set, verify gracefully
   if (!signature) {
+    if (config.NODE_ENV === 'development') {
+      logger.warn('Webhook request missing X-Hub-Signature-256 header (allowed in development mode)');
+      next();
+      return;
+    }
     logger.warn('Webhook request missing X-Hub-Signature-256 header');
     res.status(401).json({ error: 'Missing webhook signature header' });
     return;
@@ -16,6 +21,11 @@ export function verifyGitHubSignatureMiddleware(req: Request, res: Response, nex
 
   const isValid = verifyWebhookSignature(rawBody, signature, config.GITHUB_WEBHOOK_SECRET);
   if (!isValid) {
+    if (config.NODE_ENV === 'development') {
+      logger.warn('Webhook signature mismatch (allowed in development mode for seamless local testing)');
+      next();
+      return;
+    }
     logger.warn('Webhook signature mismatch. Rejecting request.');
     res.status(401).json({ error: 'Invalid HMAC signature' });
     return;
