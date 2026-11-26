@@ -30,9 +30,7 @@ export const Navigation: React.FC<NavigationProps> = ({ currentTab, onTabChange 
     <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-3 cursor-pointer" onClick={() => onTabChange('reviews')}>
-          <div className="bg-indigo-600 p-2 rounded-lg text-white shadow-lg shadow-indigo-500/20">
-            <ShieldAlert className="w-5 h-5" />
-          </div>
+          <img src="/logo.svg" alt="AI Code Reviewer" className="w-9 h-9 rounded-lg shadow-lg shadow-indigo-500/30" />
           <div>
             <div className="font-bold text-lg bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
               AI Code Reviewer
