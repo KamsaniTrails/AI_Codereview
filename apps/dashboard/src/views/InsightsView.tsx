@@ -12,9 +12,12 @@ export const InsightsView: React.FC = () => {
 
   const load = async () => {
     setLoading(true);
-    const res = await api.getInsights();
-    setData(res);
-    setLoading(false);
+    try {
+      const res = await api.getInsights();
+      setData(res);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading || !data) {

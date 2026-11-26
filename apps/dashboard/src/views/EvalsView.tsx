@@ -13,9 +13,12 @@ export const EvalsView: React.FC = () => {
 
   const load = async () => {
     setLoading(true);
-    const data = await api.getEvalRuns();
-    setEvalRuns(data);
-    setLoading(false);
+    try {
+      const data = await api.getEvalRuns();
+      setEvalRuns(data);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRunEval = async () => {
