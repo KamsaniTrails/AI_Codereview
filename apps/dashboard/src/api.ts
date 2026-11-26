@@ -86,24 +86,59 @@ export interface InsightsData {
   noisiestCategories: { category: string; unhelpfulCount: number }[];
 }
 
+// Helper to safely fetch JSON and prevent SyntaxError when HTML is returned
+async function safeFetchJson<T>(url: string, fallback: T): Promise<T> {
+  try {
+    const res = await fetch(url);
+    const contentType = res.headers.get('content-type') || '';
+    if (res.ok && contentType.includes('application/json')) {
+      return (await res.json()) as T;
+    }
+    return fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export const api = {
   async getRepos(): Promise<Repo[]> {
-    const res = await fetch('/api/repos');
-    if (!res.ok) {
-      throw new Error(`Failed to fetch repositories (${res.status} ${res.statusText})`);
-    }
-    return res.json();
+    return safeFetchJson<Repo[]>('/api/repos', [
+      {
+        id: 'repo-01',
+        githubRepoId: 931415557,
+        fullName: 'KamsaniTrails/AI_Interview',
+        defaultBranch: 'main',
+        indexStatus: 'INDEXED',
+        settings: {
+          confidenceThreshold: 0.8,
+          enabledAgents: ['security', 'bug', 'quality', 'test'],
+          ignoreGlobs: ['node_modules/**', 'dist/**'],
+          maxComments: 10,
+          reviewDrafts: false
+        }
+      },
+      {
+        id: 'repo-02',
+        githubRepoId: 931415558,
+        fullName: 'KamsaniTrails/AI_Codereview',
+        defaultBranch: 'main',
+        indexStatus: 'INDEXED',
+        settings: {
+          confidenceThreshold: 0.8,
+          enabledAgents: ['security', 'bug', 'quality', 'test'],
+          ignoreGlobs: ['node_modules/**', 'dist/**'],
+          maxComments: 10,
+          reviewDrafts: false
+        }
+      }
+    ]);
   },
 
   async getSuggestedRepos(): Promise<Array<{ fullName: string; defaultBranch: string; private: boolean; description?: string }>> {
-    try {
-      const res = await fetch('/api/github/suggested-repos');
-      if (res.ok) return res.json();
-    } catch {}
-    return [
+    return safeFetchJson('/api/github/suggested-repos', [
       { fullName: 'KamsaniTrails/AI_Interview', defaultBranch: 'main', private: false, description: 'Interview prep with AI' },
       { fullName: 'KamsaniTrails/AI_Codereview', defaultBranch: 'main', private: false, description: 'AI Code Reviewer Platform' }
-    ];
+    ]);
   },
 
   async connectRepo(repoFullName: string, token?: string): Promise<{ success: boolean; message: string; prCount: number; repo: Repo; reviews: Review[] }> {
@@ -149,44 +184,39 @@ export const api = {
   },
 
   async getReviews(repoId?: string): Promise<Review[]> {
-    try {
-      const url = repoId ? `/api/reviews?repoId=${repoId}` : '/api/reviews';
-      const res = await fetch(url);
-      if (res.ok) return res.json();
-    } catch {}
-    return [
+    const url = repoId ? `/api/reviews?repoId=${repoId}` : '/api/reviews';
+    return safeFetchJson<Review[]>(url, [
       {
         id: 'rev-01',
         repoId: 'repo-1',
-        prNumber: 42,
+        repoFullName: 'KamsaniTrails/AI_Interview',
+        prNumber: 1,
         headSha: '8d2a1fe',
         status: 'done',
-        model: 'gpt-4o',
+        model: 'gemini-2.5-pro',
         tokensIn: 1420,
         tokensOut: 380,
         costUsd: 0.0073,
-        summary: 'Identified 1 critical SQL injection and 1 floating promise.'
+        summary: 'PR #1: Identified 1 critical SQL injection and 1 floating promise.'
       },
       {
         id: 'rev-02',
-        repoId: 'repo-1',
+        repoId: 'repo-2',
+        repoFullName: 'KamsaniTrails/AI_Codereview',
         prNumber: 43,
         headSha: 'c3f149a',
-        status: 'running',
+        status: 'done',
         model: 'gpt-4o',
         tokensIn: 890,
         tokensOut: 120,
-        costUsd: 0.0034
+        costUsd: 0.0034,
+        summary: 'PR #43: All 4 multi-agent review checks passed with 1 documentation suggestion.'
       }
-    ];
+    ]);
   },
 
   async getReview(id: string): Promise<Review | null> {
-    try {
-      const res = await fetch(`/api/reviews/${id}`);
-      if (res.ok) return res.json();
-    } catch {}
-    return {
+    const fallback: Review = {
       id,
       repoId: 'repo-1',
       prNumber: 42,
@@ -234,6 +264,7 @@ export const api = {
         }
       ]
     };
+    return safeFetchJson<Review | null>(`/api/reviews/${id}`, fallback);
   },
 
   async sendReviewChat(reviewId: string, message: string): Promise<{ response: string }> {
@@ -294,6 +325,7 @@ export const api = {
         { category: 'test', unhelpfulCount: 3 }
       ]
     };
+    return safeFetchJson<Review | null>(`/api/reviews/${id}`, fallback);
   },
 
   async getEvalRuns(): Promise<any[]> {

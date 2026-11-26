@@ -32,9 +32,14 @@ export const ReviewsView: React.FC<ReviewsViewProps> = ({ onSelectReview, onOpen
 
   const load = async () => {
     setLoading(true);
-    const data = await api.getReviews();
-    setReviews(data);
-    setLoading(false);
+    try {
+      const data = await api.getReviews();
+      setReviews(data);
+    } catch (err) {
+      console.warn('Failed to load reviews:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleQuickImport = async (repoName: string) => {
